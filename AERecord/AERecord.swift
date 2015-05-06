@@ -370,6 +370,18 @@ public extension NSManagedObject {
         return objects.first ?? createWithAttributes([attribute : value], context: context)
     }
     
+    class func firstOrCreateWithAttributes(attributes: [NSObject : AnyObject], context: NSManagedObjectContext = AERecord.defaultContext) -> NSManagedObject {
+        var predicates: [NSPredicate] = []
+        for (attribute, value) in attributes {
+            predicates.append(NSPredicate(format: "%K = %@", argumentArray: [attribute, value]))
+        }
+        let predicate = NSCompoundPredicate(type: .AndPredicateType, subpredicates: predicates)
+        let request = createFetchRequest(predicate: predicate)
+        request.fetchLimit = 1
+        let objects = AERecord.executeFetchRequest(request, context: context)
+        return objects.first ?? createWithAttributes(attributes, context: context)
+    }
+
     // MARK: Deleting
     
     func delete(context: NSManagedObjectContext = AERecord.defaultContext) {
